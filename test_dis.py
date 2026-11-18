@@ -6,15 +6,12 @@ import tensorflow as tf
 from tensorflow.keras.applications.efficientnet import preprocess_input
 from sklearn.metrics import confusion_matrix, classification_report
 
-# Kullanım:
-#   python3 test_dis.py                  -> "Test Dis" klasörünü kullanır
-#   python3 test_dis.py ~/Desktop/test   -> verdiğin klasörü kullanır
-# Klasör yapısı: <klasör>/no ve <klasör>/yes
+
 TEST_DIR = os.path.expanduser(sys.argv[1]) if len(sys.argv) > 1 else "Test Dis"
 THRESHOLD = 0.4
 
 
-def crop_brain(img):  # RGB girdi, crop_dataset.py ile aynı mantık
+def crop_brain(img): 
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
     _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
