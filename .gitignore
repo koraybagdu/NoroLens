@@ -1,0 +1,10 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+Veri Seti/
+Veri Seti Yedek/
+Veri Seti Kirpilmis/
+Test Dis/
