@@ -1,12 +1,18 @@
 import os
+import sys
 import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.applications.efficientnet import preprocess_input
 from sklearn.metrics import confusion_matrix, classification_report
 
-TEST_DIR = os.path.expanduser("~/Desktop/test")
+# Kullanım:
+#   python3 test_dis.py                  -> "Test Dis" klasörünü kullanır
+#   python3 test_dis.py ~/Desktop/test   -> verdiğin klasörü kullanır
+# Klasör yapısı: <klasör>/no ve <klasör>/yes
+TEST_DIR = os.path.expanduser(sys.argv[1]) if len(sys.argv) > 1 else "Test Dis"
 THRESHOLD = 0.4
+
 
 def crop_brain(img):  # RGB girdi, crop_dataset.py ile aynı mantık
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -26,11 +32,18 @@ def crop_brain(img):  # RGB girdi, crop_dataset.py ile aynı mantık
     x1, y1 = min(x + w + pad, img.shape[1]), min(y + h + pad, img.shape[0])
     return img[y0:y1, x0:x1]
 
+
+if not os.path.isdir(TEST_DIR):
+    raise SystemExit(f"Test klasörü bulunamadı: {TEST_DIR}\n"
+                     "Beklenen yapı: <klasör>/no ve <klasör>/yes")
+
 model = tf.keras.models.load_model("best_model.keras")
 
 X, y, names = [], [], []
 for label, cat in enumerate(["no", "yes"]):
     folder = os.path.join(TEST_DIR, cat)
+    if not os.path.isdir(folder):
+        raise SystemExit(f"Alt klasör bulunamadı: {folder}")
     for f in os.listdir(folder):
         if not f.lower().endswith((".jpg", ".jpeg", ".png")):
             continue
@@ -49,7 +62,7 @@ pred = (probs > THRESHOLD).astype(int)
 
 print("Görsel sayısı:", len(y))
 print("Dış test accuracy:", (pred == y).mean())
-print(confusion_matrix(y, pred))    
+print(confusion_matrix(y, pred))
 print(classification_report(y, pred, target_names=["no", "yes"]))
 
 print("\nYanlış bilinenler:")
